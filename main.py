@@ -8,15 +8,18 @@ if __name__ == "__main__":
             print('\n', color.UNDERLINE + color.YELLOW, "Выберите метод интерполяции или выход.", color.END)
             print(color.GREEN,
                   '\t', "1. Многочлен Лагранжа", '\n',
-                  '\t', "2. Многочлен Ньютона с радленными разностями", '\n',
-                  '\t', "3. Выход!", color.END)
+                  '\t', "2. Многочлен Ньютона с разделнными разностями", '\n',
+                  '\t', "3. Многочлен Ньютона для равноотстоящих узлов", '\n',
+                  '\t', "4. Выход!", color.END)
             choice = int(input("Введите номер дейсивя: ").strip())
 
             if choice == 1:
-                new_input = select.Input(1)
+                new_input = select.Input(choice)
             elif choice == 2:
-                new_input = select.Input(2)
+                new_input = select.Input(choice)
             elif choice == 3:
+                new_input = select.Input(choice)
+            elif choice == 4:
                 print(color.BOLD + color.PURPLE, 'Удачи!', color.END)
                 break
             else:

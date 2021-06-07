@@ -1,4 +1,7 @@
 import warnings
+
+from numpy.lib import math
+
 import colors as color
 import numpy as np
 from tabulate import tabulate
@@ -6,6 +9,7 @@ import matplotlib.pyplot as plt
 import traceback
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 
 class Solver:
     x = []
@@ -27,9 +31,14 @@ class Solver:
         self.y = [data[i][1] for i in range(len(data))]
 
     def solve(self):
-        self.answer = self.lagrange(self.x0) if self.method == 1 else self.newton(self.x0)
+        if self.method == 1:
+            self.answer = self.lagrange(self.x0)
+        elif self.method == 2:
+            self.answer = self.newton_div(self.x0)
+        elif self.method == 3:
+            self.answer = self.newton_fin(self.x0)
 
-        print('\n', color.UNDERLINE + color.YELLOW, "Выберите дествие:", color.END)
+        print('\n', color.UNDERLINE + color.RED, "Выберите дествие:", color.END)
         print('\t', "1. Вывести на экран результат", '\n',
               '\t', "2. Сохранить в файл результат")
         while True:
@@ -45,7 +54,12 @@ class Solver:
                 continue
             except ValueError:
                 continue
-        self.draw_graph(self.lagrange) if self.method == 1 else self.draw_graph(self.newton)
+        if self.method == 1:
+            self.draw_graph(self.lagrange)
+        elif self.method == 2:
+            self.draw_graph(self.newton_div)
+        elif self.method == 3:
+            self.draw_graph(self.newton_fin)
 
     # Вычисление значения в точке с помощью многослена Лагранджа
     def lagrange(self, x_cur=x0):
@@ -60,7 +74,7 @@ class Solver:
         return answer
 
     # Вычисление значения в точке с помощью многослена Ньютона
-    def newton(self, x_cur=x0):
+    def newton_div(self, x_cur=x0):
         x = np.copy(self.x)
         y = np.copy(self.y)
         m = self.n
@@ -81,18 +95,39 @@ class Solver:
             answer = y[n - k] + (x_cur - self.x[n - k]) * answer
         return answer
 
+    def newton_fin(self, x_cur=x0):
+        def elem(n, t):
+            if n == 0:
+                return 1
+            elif n == 1:
+                return t
+            else:
+                return np.prod(np.array([t - i for i in range(0, n)])) / np.prod(np.array([i + 1 for i in range(0, n)]))
+
+        x = np.copy(self.x)
+        y = np.copy(self.y)
+        h = x[1] - x[0]
+        x_ceil = math.ceil((x_cur - x[0]) / h) - 1
+        # Строим таблицу
+        dy = [[i] for i in y]
+        for j in range(0, len(dy)):
+            for i in range(0, len(y) - 1 - j):
+                dy[i].append(dy[i + 1][-1] - dy[i][-1])
+        answer = sum([(elem(i, (x_cur - x[x_ceil]) / h) * dy[x_ceil][i]) for i in range(len(dy[x_ceil]))])
+        return answer
+
     # Вывод результата на экран
     def print_result(self):
         print()
-        print(color.UNDERLINE + color.YELLOW, "Таблица введенных данных (X и Y):", color.END)
+        print(color.UNDERLINE + color.RED, "Таблица введенных данных (X и Y):", color.END)
         print(self.get_tablet(), "\n")
 
         if self.method == 1:
-            print(color.UNDERLINE + color.YELLOW, "Значение функции используя многочлен Лагранжа", color.END)
+            print(color.UNDERLINE + color.RED, "Значение функции используя многочлен Лагранжа", color.END)
         elif self.method == 2:
-            print(color.UNDERLINE + color.YELLOW, "Значение функции используя многочлен Ньютона с разделенными "
-                                                  "разностями", color.END)
-        print('\t', f'{color.BOLD + color.GREEN}f({self.x0}) ={color.END} {self.answer}')
+            print(color.UNDERLINE + color.RED, "Значение функции используя многочлен Ньютона с разделенными "
+                                               "разностями", color.END)
+        print('\t', f'{color.BOLD + color.BLUE}f({self.x0}) ={color.END} {self.answer}')
         print()
 
     # Сохранение результата в файл
@@ -129,8 +164,12 @@ class Solver:
 
             x = np.linspace(self.x[0], self.x[-1], 100)
             y = [fi_fun(i) for i in x]
-
-            plt.title("Многочлен Лагранжа") if self.method == 1 else plt.title("Многочлен Ньютона")
+            if self.method == 1:
+                plt.title("Многочлен Лагранжа")
+            elif self.method == 2:
+                plt.title("Многочлен Ньютона")
+            elif self.method == 3:
+                plt.title("Многочлен Ньютона")
             plt.plot(x, x * 0, color="black", linewidth=1)
             plt.plot(self.x, self.y, 'o', color='r', label='Исходные точки')
             plt.plot(x, y, color='b', label='Приблизительная функция')
