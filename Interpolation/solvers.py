@@ -96,7 +96,7 @@ class Solver:
         return answer
 
     def newton_fin(self, x_cur=x0):
-        def elem(n, t):
+        def left(n, t):
             if n == 0:
                 return 1
             elif n == 1:
@@ -104,16 +104,34 @@ class Solver:
             else:
                 return np.prod(np.array([t - i for i in range(0, n)])) / np.prod(np.array([i + 1 for i in range(0, n)]))
 
+        def right(n, t):
+            if n == 0:
+                return 1
+            elif n == 1:
+                return t
+            else:
+                return np.prod(np.array([t + i for i in range(0, n)])) / np.prod(np.array([i + 1 for i in range(0, n)]))
+
         x = np.copy(self.x)
         y = np.copy(self.y)
+        if x_cur == x[0]:
+            return y[0]
+        elif x_cur == x[-1]:
+            return y[-1]
+
         h = x[1] - x[0]
-        x_ceil = math.ceil((x_cur - x[0]) / h) - 1
+
         # Строим таблицу
         dy = [[i] for i in y]
         for j in range(0, len(dy)):
             for i in range(0, len(y) - 1 - j):
                 dy[i].append(dy[i + 1][-1] - dy[i][-1])
-        answer = sum([(elem(i, (x_cur - x[x_ceil]) / h) * dy[x_ceil][i]) for i in range(len(dy[x_ceil]))])
+        # if (x_cur <= (x[0] + x[-1]) / 2):
+        x_ceil = math.ceil((x_cur - x[0]) / h) - 1
+        answer = sum([(left(i, (x_cur - x[x_ceil]) / h) * dy[x_ceil][i]) for i in range(len(dy[x_ceil]))])
+        # else:
+        #     x_ceil = math.ceil((x_cur - x[0]) / h)
+        #     answer = sum([(right(len(dy[i])-1, (x_cur - x[x_ceil]) / h) * dy[i][-1]) for i in range(len(dy))])
         return answer
 
     # Вывод результата на экран
@@ -127,6 +145,9 @@ class Solver:
         elif self.method == 2:
             print(color.UNDERLINE + color.RED, "Значение функции используя многочлен Ньютона с разделенными "
                                                "разностями", color.END)
+        elif self.method == 3:
+            print(color.UNDERLINE + color.RED, "Значение функции используя многочлен Ньютона для равноотстоящих узлов",
+                  color.END)
         print('\t', f'{color.BOLD + color.BLUE}f({self.x0}) ={color.END} {self.answer}')
         print()
 
@@ -141,6 +162,8 @@ class Solver:
                 print("Значение функции используя многочлен Лагранжа", file=file)
             elif self.method == 2:
                 print("Значение функции используя многочлен Ньютона с разделенными разностями", file=file)
+            elif self.method == 3:
+                print("Значение функции используя многочлен Ньютона для равноотстоящих узлов", file=file)
             print('\t', f'f({self.x0}) = {self.answer}', file=file)
 
     # Создание таблицы данных (X и Y)
@@ -167,9 +190,9 @@ class Solver:
             if self.method == 1:
                 plt.title("Многочлен Лагранжа")
             elif self.method == 2:
-                plt.title("Многочлен Ньютона")
+                plt.title("Многочлен Ньютона с разделёнными разностями")
             elif self.method == 3:
-                plt.title("Многочлен Ньютона")
+                plt.title("Многочлен Ньютона для равноотстоящих узлов")
             plt.plot(x, x * 0, color="black", linewidth=1)
             plt.plot(self.x, self.y, 'o', color='r', label='Исходные точки')
             plt.plot(x, y, color='b', label='Приблизительная функция')

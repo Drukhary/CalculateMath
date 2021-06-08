@@ -5,7 +5,7 @@ if __name__ == "__main__":
     print(color.BOLD + color.RED, "Интерполяция функции!", color.END)
     while True:
         try:
-            print('\n', color.UNDERLINE + color.YELLOW, "Выберите метод интерполяции или выход.", color.END)
+            print('\n', color.UNDERLINE + color.RED, "Выберите метод интерполяции или выход.", color.END)
             print(color.GREEN,
                   '\t', "1. Многочлен Лагранжа", '\n',
                   '\t', "2. Многочлен Ньютона с разделнными разностями", '\n',
